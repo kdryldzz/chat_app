@@ -1,3 +1,5 @@
+import 'package:chat_app_1/helpers/database_helper.dart';
+import 'package:chat_app_1/models/local_message.dart';
 import 'package:chat_app_1/models/messages.dart';
 import 'package:chat_app_1/models/rooms.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -45,7 +47,7 @@ Future<List<Messages>> listMessages(String roomId) async {
   try {
     final response = await supabase
         .from('messages')
-        .select()
+        .select() // Include the seen field
         .eq('room_id', roomId);
 
     if (response.isEmpty) {
@@ -57,26 +59,6 @@ Future<List<Messages>> listMessages(String roomId) async {
   } catch (e) {
     print('Error fetching messages: $e');
     return [];
-  }
-}
-
-Future<String> createRoom(String userId) async {
-  final currentUser = supabase.auth.currentUser!.id;
-  try {
-    final response = await supabase
-        .from('rooms')
-        .insert({
-          'user1_id': currentUser,
-          'user2_id': userId,
-        })
-        .select()
-        .single();
-
-
-    return response['id'];
-  } catch (e) {
-    print('Error creating room: $e');
-    return '';
   }
 }
 
@@ -172,4 +154,93 @@ Future<String> getOtherUsername(String roomId) async {
   return userResponse['username'];
 }
 
+Future<String> getOtherAvatarUrl(String roomId) async {
+  final currentUser = supabase.auth.currentUser!.id;
+  final response = await supabase
+      .from('rooms')
+      .select('user1_id, user2_id')
+      .eq('room_id', roomId)
+      .single();
+
+  final otherUserId = response['user1_id'] == currentUser
+      ? response['user2_id']
+      : response['user1_id'];
+
+  final userResponse = await supabase
+      .from('users')
+      .select('avatar_url')
+      .eq('id', otherUserId)
+      .single();
+
+  return userResponse['avatar_url'];
 }
+
+Future<void> deleteMessageFromSupabase(String messageId) async {
+  try {
+    final response = await supabase.from('messages').delete().eq('message_id', messageId);
+
+    if (response.error != null) {
+      print('Error deleting message from Supabase: ${response.error!.message}');
+    } else {
+      print('Message $messageId deleted from Supabase');
+    }
+  } catch (e) {
+    print('Error deleting message from Supabase: $e');
+  }
+}
+  Future<void> markMessagesAsSeen(String roomId) async {
+    final currentUser = supabase.auth.currentUser!.id;
+    try {
+      final unseenMessages = await supabase
+          .from('messages')
+          .select('message_id')
+          .eq('room_id', roomId)
+          .eq('receiverUser_id', currentUser);
+
+      for (var message in unseenMessages) {
+        await deleteMessageFromSupabase(message['message_id']);
+      }
+
+      print('Mesajlar silindi ve local database\'e kaydedildi.');
+    } catch (e) {
+      print('Error marking messages as seen: $e');
+    }
+  }
+
+  Future<List<LocalMessage>> loadMessages(String roomId) async {
+  try {
+    final unseenMessages = await listMessages(roomId);
+    List<LocalMessage> messages = [];
+
+    for (var message in unseenMessages) {
+      bool exists = await DatabaseHelper().messageExists(message.message_id);
+      if (!exists) {
+        await DatabaseHelper().insertMessage(LocalMessage(
+          messageId: message.message_id,
+          senderUserId: message.senderUser_id,
+          receiverUserId: message.receiverUser_id,
+          roomId: message.room_id,
+          content: message.content,
+          createdAt: message.created_at,
+        ));
+      }
+    }
+
+    messages = await DatabaseHelper().getMessages(roomId);
+    return messages; // Mesajları döndür
+  } catch (e) {
+    print('Error loading messages: $e');
+    return [];
+  }
+}
+Future<void> justDeleteMessagesSupabase(String room_id)async{
+if(room_id.isNotEmpty){
+  try{
+   await supabase.from('messages').delete().eq('room_id', room_id);
+  }
+catch(e){
+print('error : $e');
+}
+}
+}}
+

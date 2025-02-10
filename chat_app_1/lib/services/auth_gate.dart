@@ -26,7 +26,7 @@ class _AuthGateState extends State<AuthGate> {
     }else{
       return LoginScreen();
     }
-    }
+    } 
     
     ,);
   }

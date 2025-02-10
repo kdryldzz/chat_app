@@ -1,6 +1,6 @@
+import 'package:chat_app_1/controllers/search_screen_provider.dart';
 import 'package:chat_app_1/screens/chat_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:chat_app_1/controllers/search_screen_controller.dart';
 import 'package:chat_app_1/models/users.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -75,7 +75,11 @@ class _SearchScreenState extends State<SearchScreen> {
                           if (user.username.toLowerCase().contains(query.toLowerCase())) {
                             return ListTile(
                               leading: CircleAvatar(
-                                backgroundImage: AssetImage('assets/images/profile.png'), // Example profile image
+                                backgroundImage: NetworkImage(
+                                  user.avatar_url.isNotEmpty
+                                      ? user.avatar_url
+                                      : 'assets/images/profile.png', // Varsayılan fotoğraf
+                                ),
                               ),
                               title: Text(user.username),
                               subtitle: Text(user.email),
