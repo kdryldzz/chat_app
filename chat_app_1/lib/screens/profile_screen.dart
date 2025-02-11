@@ -109,7 +109,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             color: Colors.white,
             shadows: [
               Shadow(
-                blurRadius: 10.0,
+                blurRadius: 9.0,
                 color: Colors.black45,
                 offset: Offset(2.0, 2.0),
               ),
