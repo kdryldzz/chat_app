@@ -17,7 +17,7 @@ class _ChatsListScreenState extends State<ChatsListScreen> {
   final SearchScreenController _controller = SearchScreenController();
   late Future<List<Rooms>> _roomsFuture;
   String query = '';
-  int unseenMessageNumber = 4;
+  int unseenMessageNumber =0;
 
   @override
   void initState() {
@@ -79,10 +79,8 @@ Future<void> confirmAndDeleteRoom(BuildContext context, String roomId) async {
 Future<void> countUnseenMessages(String roomId) async {
   final currentUser = _supabase.auth.currentUser!.id;
   try {
-    final unseenMessages = await _supabase.from('messages').select('message_id').eq('receiverUser_id', currentUser).eq('room_id', roomId).eq('isSeen', false);
-    setState(() {
+    final unseenMessages = await _supabase.from('messages').select('message_id').eq('receiverUser_id', currentUser).eq('room_id', roomId).eq('seen', false); 
       unseenMessageNumber = unseenMessages.length;
-    });
   } catch (e) {
     debugPrint('Error counting unseen messages: $e');
   }
@@ -164,20 +162,20 @@ Future<void> countUnseenMessages(String roomId) async {
                                   future: _controller.getOtherAvatarUrl(room.room_id),  // Kullanıcının avatar_url'sini alıyoruz
                                   builder: (context, avatarSnapshot) {
                                     String avatarUrl = 'https://e7.pngegg.com/pngimages/84/165/png-clipart-united-states-avatar-organization-information-user-avatar-service-computer-wallpaper.png';  // Varsayılan avatar
-                                     countUnseenMessages(room.room_id);
+                                    countUnseenMessages(room.room_id); 
                                     if (avatarSnapshot.connectionState == ConnectionState.done && avatarSnapshot.hasData) {
-                                      avatarUrl = avatarSnapshot.data!;  // Avatar URL varsa, onu kullanıyoruz
+                                      avatarUrl = avatarSnapshot.data!;  
+                                      // Avatar URL varsa, onu kullanıyoruz 
                                     }
-
                                     // Username'a göre arama işlemi
                                     if (username.toLowerCase().contains(query.toLowerCase())) {
+                                      countUnseenMessages(room.room_id); 
                                       return ListTile(
                                         leading: CircleAvatar(
                                           backgroundImage: NetworkImage(avatarUrl), // Kullanıcı avatar URL'si
                                         ),
                                         title: Text(username),
                                         subtitle: 
-                                        
                                         Container(
                                           alignment: Alignment.centerLeft,
                                           decoration: BoxDecoration(
