@@ -2,6 +2,7 @@ import 'package:chat_app_1/controllers/search_screen_provider.dart';
 import 'package:chat_app_1/screens/chat_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:chat_app_1/models/rooms.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ChatsListScreen extends StatefulWidget {
@@ -12,14 +13,17 @@ class ChatsListScreen extends StatefulWidget {
 }
 
 class _ChatsListScreenState extends State<ChatsListScreen> {
+  SupabaseClient _supabase = Supabase.instance.client;
   final SearchScreenController _controller = SearchScreenController();
   late Future<List<Rooms>> _roomsFuture;
   String query = '';
+  int unseenMessageNumber = 4;
 
   @override
   void initState() {
     super.initState();
     _roomsFuture = _controller.ListRooms();
+
   }
 Future<void> confirmAndDeleteRoom(BuildContext context, String roomId) async {
   if (roomId.isNotEmpty) {
@@ -72,6 +76,18 @@ Future<void> confirmAndDeleteRoom(BuildContext context, String roomId) async {
 }
 
 
+Future<void> countUnseenMessages(String roomId) async {
+  final currentUser = _supabase.auth.currentUser!.id;
+  try {
+    final unseenMessages = await _supabase.from('messages').select('message_id').eq('receiverUser_id', currentUser).eq('room_id', roomId).eq('isSeen', false);
+    setState(() {
+      unseenMessageNumber = unseenMessages.length;
+    });
+  } catch (e) {
+    debugPrint('Error counting unseen messages: $e');
+  }
+}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -83,19 +99,19 @@ Future<void> confirmAndDeleteRoom(BuildContext context, String roomId) async {
           ),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding:  EdgeInsets.all(8.0.w),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const SizedBox(height: 30), // Yükseklik düzenlemesi
+              SizedBox(height: 30.h), // Yükseklik düzenlemesi
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0), // Padding
+                padding: EdgeInsets.symmetric(horizontal: 8.0.w), // Padding
                 child: TextField(
                   decoration: InputDecoration(
                     hintText: 'Search', // Arama kutusu
                     prefixIcon: Icon(Icons.search),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
+                      borderRadius: BorderRadius.circular(8.0.r),
                     ),
                     filled: true,
                     fillColor: Colors.white.withOpacity(0.8),
@@ -137,7 +153,7 @@ Future<void> confirmAndDeleteRoom(BuildContext context, String roomId) async {
                               } else if (userSnapshot.hasError) {
                                 return ListTile(
                                   title: Text('Error'),
-                                  subtitle: Text('Room ID: ${room.room_id}'),
+                                  subtitle:Text('Room ID: ${room.room_id}'),
                                   trailing: IconButton(onPressed: (){
                                     confirmAndDeleteRoom(context,room.room_id);
                                   }, icon: Icon(Icons.delete)),
@@ -148,7 +164,7 @@ Future<void> confirmAndDeleteRoom(BuildContext context, String roomId) async {
                                   future: _controller.getOtherAvatarUrl(room.room_id),  // Kullanıcının avatar_url'sini alıyoruz
                                   builder: (context, avatarSnapshot) {
                                     String avatarUrl = 'https://e7.pngegg.com/pngimages/84/165/png-clipart-united-states-avatar-organization-information-user-avatar-service-computer-wallpaper.png';  // Varsayılan avatar
-
+                                     countUnseenMessages(room.room_id);
                                     if (avatarSnapshot.connectionState == ConnectionState.done && avatarSnapshot.hasData) {
                                       avatarUrl = avatarSnapshot.data!;  // Avatar URL varsa, onu kullanıyoruz
                                     }
@@ -160,7 +176,19 @@ Future<void> confirmAndDeleteRoom(BuildContext context, String roomId) async {
                                           backgroundImage: NetworkImage(avatarUrl), // Kullanıcı avatar URL'si
                                         ),
                                         title: Text(username),
-                                        subtitle: Text('Room ID: ${room.room_id}'),
+                                        subtitle: 
+                                        
+                                        Container(
+                                          alignment: Alignment.centerLeft,
+                                          decoration: BoxDecoration(
+                                            color: Colors.red,
+                                            borderRadius: BorderRadius.circular(20)
+                                          ),
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(left: 15),
+                                            child: Text("$unseenMessageNumber new messages"),
+                                          ), // Yeni mesaj sayısı
+                                        ),
                                         trailing: IconButton(onPressed: (){
                                           confirmAndDeleteRoom(context,room.room_id);
                                         }, icon: Icon(Icons.delete)),

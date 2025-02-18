@@ -1,6 +1,7 @@
 import 'package:chat_app_1/providers/auth_provider.dart';
 import 'package:chat_app_1/screens/register_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -31,45 +32,45 @@ class _LoginScreenState extends State<LoginScreen> {
         child: SingleChildScrollView(
           child: Container(
             height: MediaQuery.of(context).size.height,
-            padding: const EdgeInsets.all(16.0),
+            padding:  EdgeInsets.all(16.0.h),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const SizedBox(height: 200),
-                const Text(
+                 SizedBox(height: 200.h),
+                 Text(
                   'Login',
                   style: TextStyle(
-                    fontSize: 30,
+                    fontSize: 30.sp,
                     fontWeight: FontWeight.bold,
                     color: Colors.deepPurple,
                   ),
                 ),
-                const SizedBox(height: 20),
+                 SizedBox(height: 20.h),
                 TextField(
                   controller: emailController,
                   decoration: InputDecoration(
                     labelText: 'Email',
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(10.r),
                     ),
                     filled: true,
                     fillColor: Colors.white.withOpacity(0.8),
                   ),
                 ),
-                const SizedBox(height: 20),
+                 SizedBox(height: 20.h),
                 TextField(
                   controller: passwordController,
                   decoration: InputDecoration(
                     labelText: 'Password',
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(10.r),
                     ),
                     filled: true,
                     fillColor: Colors.white.withOpacity(0.8),
                   ),
                   obscureText: true,
                 ),
-                const SizedBox(height: 30),
+                 SizedBox(height: 30.h),
                  Consumer<AuthProvider>(builder: (context, value, child) {
                    return ElevatedButton(
                       onPressed: () {
@@ -78,18 +79,18 @@ class _LoginScreenState extends State<LoginScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.deepPurple,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(10.r),
                         ),
-                        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                        padding:  EdgeInsets.symmetric(horizontal: 30.w, vertical: 15.h),
                       ),
-                      child: const Text(
+                      child: Text(
                         'Login',
-                        style: TextStyle(fontSize: 16, color: Colors.white),
+                        style: TextStyle(fontSize: 16.sp, color: Colors.white),
                       ),
                     );
                  },
                  ),
-                const SizedBox(height: 20),
+                 SizedBox(height: 20.h),
                 TextButton(
                   onPressed: () {
                     Navigator.pushReplacement(

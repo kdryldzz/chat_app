@@ -1,6 +1,7 @@
 import 'package:chat_app_1/providers/auth_provider.dart';
 import 'package:chat_app_1/services/auth_gate.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -22,14 +23,26 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context)=>AuthProvider(),
         ),
       ],
-      child: MaterialApp(
-        title: 'Flutter Demo',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-          useMaterial3: true,
+      child: ScreenUtilInit(
+        //take with meediaquery
+        designSize: MediaQuery.of(context).size,
+        child: MaterialApp(
+          title: 'Flutter Demo',
+          debugShowCheckedModeBanner: false,
+          theme: ThemeData(
+            elevatedButtonTheme: ElevatedButtonThemeData(
+              style: ElevatedButton.styleFrom(
+                foregroundColor: Colors.white, backgroundColor: Colors.deepPurple,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
+            ),
+            primaryColor: Colors.white,
+            scaffoldBackgroundColor: Colors.blueGrey.shade500,
+          ),
+          home: AuthGate(),
         ),
-        home: AuthGate(),
       ),
     );
   }

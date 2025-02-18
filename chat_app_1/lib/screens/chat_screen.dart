@@ -2,6 +2,7 @@ import 'package:chat_app_1/controllers/search_screen_provider.dart';
 import 'package:chat_app_1/helpers/database_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:chat_app_1/models/local_message.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -132,13 +133,13 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: EdgeInsets.all(8.0.w),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const SizedBox(height: 10),
+              SizedBox(height: 10.h),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                padding: EdgeInsets.symmetric(horizontal: 8.0.w),
                 child: AppBar(
                   backgroundColor: Colors.transparent, // Saydam arka plan
                   elevation: 0, // Gölgeyi kaldır
@@ -161,7 +162,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     },
                   ),
                   centerTitle: true,
-                  toolbarHeight: 30, // Daha geniş AppBar
+                  toolbarHeight: 30.h, // Daha geniş AppBar
                   actions: [IconButton(onPressed:(){
                     _deleteMessagesAsRoomId(widget.roomId); // this method deletes only seen messages
                   }, icon: Icon(Icons.delete))],
@@ -178,11 +179,11 @@ class _ChatScreenState extends State<ChatScreen> {
                       alignment:
                           isCurrentUser ? Alignment.centerRight : Alignment.centerLeft,
                       child: Container(
-                        padding: EdgeInsets.symmetric(vertical: 10, horizontal: 14),
-                        margin: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+                        padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 14.w),
+                        margin: EdgeInsets.symmetric(vertical: 5.h, horizontal: 10.w),
                         decoration: BoxDecoration(
                           color: isCurrentUser ? Colors.blue[200] : Colors.grey[300],
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(10.r),
                         ),
                         child: Column(
                           crossAxisAlignment:
@@ -190,12 +191,12 @@ class _ChatScreenState extends State<ChatScreen> {
                           children: [
                             Text(
                               message.content,
-                              style: TextStyle(fontSize: 16),
+                              style: TextStyle(fontSize: 16.sp),
                             ),
-                            SizedBox(height: 5),
+                            SizedBox(height: 5.h),
                             Text(
                               message.createdAt.toLocal().toString(),
-                              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                              style: TextStyle(fontSize: 12.sp, color: Colors.grey[600]),
                             ),
                           ],
                         ),
@@ -205,7 +206,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.all(8.0.w),
                 child: Row(
                   children: [
                     Expanded(
@@ -214,7 +215,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         decoration: InputDecoration(
                           hintText: 'Type a message',
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8.0),
+                            borderRadius: BorderRadius.circular(8.0.r),
                           ),
                           filled: true,
                           fillColor: Colors.white.withOpacity(0.8),

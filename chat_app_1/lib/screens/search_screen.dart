@@ -2,6 +2,7 @@ import 'package:chat_app_1/controllers/search_screen_provider.dart';
 import 'package:chat_app_1/screens/chat_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:chat_app_1/models/users.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -32,19 +33,19 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: EdgeInsets.all(8.0.w),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const SizedBox(height: 30), // Reduced height
+               SizedBox(height: 30.h), // Reduced height
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0), // Adjusted padding
+                padding: EdgeInsets.symmetric(horizontal: 8.0.w), // Adjusted padding
                 child: TextField(
                   decoration: InputDecoration(
                     hintText: 'Search...',
                     prefixIcon: Icon(Icons.search),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
+                      borderRadius: BorderRadius.circular(8.0.r),
                     ),
                     filled: true,
                     fillColor: Colors.white.withOpacity(0.8),
