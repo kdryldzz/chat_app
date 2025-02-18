@@ -10,5 +10,4 @@ static ThemeData get lightTheme {
     brightness: Brightness.light,
     dividerColor: Colors.white54,
   );
-
 }}

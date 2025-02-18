@@ -6,6 +6,7 @@ class Messages {
   final String content;
   final DateTime created_at;
   final bool seen; // Add seen field
+  final String image_url;
 
   Messages({
     required this.message_id,
@@ -15,6 +16,7 @@ class Messages {
     required this.content,
     required this.created_at,
     required this.seen, // Add seen field
+    required this.image_url,
   });
 
   factory Messages.fromMap(Map<String, dynamic> map) {
@@ -26,6 +28,7 @@ class Messages {
       content: map['content'],
       created_at: DateTime.parse(map['created_at']),
       seen: map['seen'], // Add seen field
+      image_url: map['image_url']
     );
   }
 
@@ -38,6 +41,7 @@ class Messages {
       'content': content,
       'created_at': created_at.toIso8601String(),
       'seen': seen, // Add seen field
+      'image_url':image_url
     };
   }
 }

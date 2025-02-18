@@ -138,7 +138,7 @@ Future uploadImage() async {
               setState(() {
                 _loadUserData();
               });
-            } , child: const Text("load an image")),
+            } , child: const Text("Edit")),
             SizedBox(height: 20.h),
             Text(
               userName ?? 'Loading...',

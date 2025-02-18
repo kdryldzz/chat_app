@@ -5,7 +5,7 @@ import 'package:chat_app_1/models/rooms.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:chat_app_1/models/users.dart';
 
-class SearchScreenController {
+class GlobalController {
 final supabase = Supabase.instance.client;
  Future<List<Users>> listUsers() async {
   try {

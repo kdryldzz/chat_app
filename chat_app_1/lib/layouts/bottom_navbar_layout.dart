@@ -1,7 +1,6 @@
 import 'package:chat_app_1/screens/chats_list_screen.dart';
 import 'package:chat_app_1/screens/profile_screen.dart';
 import 'package:chat_app_1/screens/search_screen.dart';
-import 'package:chat_app_1/screens/settings_screen.dart';
 import 'package:flutter/material.dart';
 class BottomNavbarLayout extends StatefulWidget {
   final int selectedIndex;
@@ -24,7 +23,6 @@ class _BottomNavbarLayoutState extends State<BottomNavbarLayout> {
     ProfileScreen(),
     SearchScreen(),
     ChatsListScreen(),
-    SettingsScreen()
   ];
 
   void _onItemTapped(int index) {
@@ -70,10 +68,6 @@ class _BottomNavbarLayoutState extends State<BottomNavbarLayout> {
                BottomNavigationBarItem(
                 icon: Icon(Icons.chat_bubble),
                 label: 'Chats',
-              ),
-               BottomNavigationBarItem(
-                icon: Icon(Icons.settings),
-                label: 'Settings',
               ),
             ],
             currentIndex: _selectedIndex,
