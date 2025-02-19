@@ -3,8 +3,8 @@ import 'package:path/path.dart';
 import 'package:chat_app_1/models/local_message.dart';
 
 class DatabaseHelper {
-  static final DatabaseHelper _instance = DatabaseHelper._internal();
-  factory DatabaseHelper() => _instance;
+  static final DatabaseHelper instance = DatabaseHelper._internal();
+  factory DatabaseHelper() => instance;
   DatabaseHelper._internal();
 
   static Database? _database;

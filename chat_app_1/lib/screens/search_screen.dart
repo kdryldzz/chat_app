@@ -71,7 +71,7 @@ class _SearchScreenState extends State<SearchScreen> {
                             leading: CircleAvatar(
                               backgroundImage: NetworkImage(
                                 user.avatar_url.isNotEmpty
-                                    ? user.avatar_url
+                                    ? "https://wjxfpnsrjsofhfstivls.supabase.co/storage/v1/object/public/images/uploads/${user.id}/${user.avatar_url}"
                                     : 'assets/images/profile.png', // Varsayılan fotoğraf
                               ),
                             ),

@@ -9,13 +9,11 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ChatScreen extends StatefulWidget {
   final String roomId;
-
   const ChatScreen({super.key, required this.roomId});
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
 }
-
 class _ChatScreenState extends State<ChatScreen> {
   final GlobalController _controller = GlobalController();
   late Future<String> _otherUsernameFuture;
@@ -116,7 +114,6 @@ if(image != null){
  });
 }}
 
-
   // Kaydırmayı en alta yapacak fonksiyon
   void _scrollToBottom() {
     // Mesajlar geldikçe kaydırmayı kontrol et
@@ -128,14 +125,12 @@ if(image != null){
       );
     }
   }
-
   @override
   void dispose() {
     _supabase.removeAllChannels();
     _scrollController.dispose(); // Controller'ı dispose ediyoruz
     super.dispose();
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

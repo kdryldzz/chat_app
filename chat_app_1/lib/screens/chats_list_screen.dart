@@ -1,4 +1,6 @@
 import 'package:chat_app_1/controllers/global_controller.dart';
+import 'package:chat_app_1/helpers/database_helper.dart';
+import 'package:chat_app_1/models/local_message.dart';
 import 'package:flutter/material.dart';
 import 'package:chat_app_1/models/rooms.dart';
 import 'package:chat_app_1/screens/chat_screen.dart';
@@ -17,13 +19,9 @@ class _ChatsListScreenState extends State<ChatsListScreen> {
   final GlobalController _controller = GlobalController();
   late Future<List<Rooms>> _roomsFuture;
   String query = '';
+ 
 
-  @override
-  void initState() {
-    super.initState();
-    _roomsFuture = _controller.ListRooms();
-  }
-
+ 
   Future<void> confirmAndDeleteRoom(BuildContext context, String roomId) async {
     if (roomId.isNotEmpty) {
       bool? confirmDelete = await showDialog<bool>(
@@ -90,6 +88,70 @@ class _ChatsListScreenState extends State<ChatsListScreen> {
       return 0;
     }
   }
+
+
+   String lastMessage = "";
+ Future<String> fetchLastMessage(String roomId) async {
+  try {
+    // 🔹 Supabase'den son mesajı al
+    final response = await _supabase
+        .from('messages')
+        .select('content, created_at')
+        .eq('room_id', roomId)
+        .order('created_at', ascending: false) // En güncel mesajı al
+        .limit(1);
+
+    String? supabaseMessage;
+    DateTime? supabaseTime;
+
+    if (response.isNotEmpty) {
+      supabaseMessage = response[0]['content'];
+      supabaseTime = DateTime.parse(response[0]['created_at']);
+    }
+
+    // 🔹 Lokal veritabanından son mesajı al (örneğin SQLite)
+    final localMessage = await fetchLastLocalMessage(roomId);
+
+    // 🔹 Karşılaştır ve en güncel mesajı döndür
+    if (supabaseTime != null && localMessage != null) {
+      return (supabaseTime.isAfter(localMessage.createdAt))
+          ? supabaseMessage!
+          : localMessage.content;
+    } else if (supabaseMessage != null) {
+      return supabaseMessage;
+    } else if (localMessage != null) {
+      return localMessage.content;
+    } else {
+      return "No messages";
+    }
+  } catch (e) {
+    print("fetch last message error: $e");
+    return "Error loading message";
+  }
+}
+Future<LocalMessage?> fetchLastLocalMessage(String roomId) async {
+  final db = await DatabaseHelper.instance.database;
+  final result = await db.query(
+    'messages',
+    where: 'room_id = ?',
+    whereArgs: [roomId],
+    orderBy: 'created_at DESC', // En son mesajı al
+    limit: 1,
+  );
+
+  if (result.isNotEmpty) {
+    return LocalMessage.fromMap(result.first);
+  } else {
+    return null;
+  }
+}
+
+   @override
+  void initState() {
+    super.initState();
+    _roomsFuture = _controller.ListRooms();
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -170,13 +232,13 @@ class _ChatsListScreenState extends State<ChatsListScreen> {
                                   if (avatarSnapshot.connectionState == ConnectionState.done && avatarSnapshot.hasData) {
                                     avatarUrl = avatarSnapshot.data!; // Avatar URL varsa, onu kullanıyoruz
                                   }
-                                  return FutureBuilder<int>(
-                                    future: countUnseenMessages(room.room_id),
-                                    builder: (context, unseenSnapshot) {
-                                      if (unseenSnapshot.connectionState == ConnectionState.waiting) {
+                                  return FutureBuilder<String>(
+                                    future: fetchLastMessage(room.room_id),
+                                    builder: (context, lastMessageSnapshot) {
+                                      if (lastMessageSnapshot.connectionState == ConnectionState.waiting) {
                                         return ListTile(
                                           leading: CircleAvatar(
-                                            backgroundImage: NetworkImage(avatarUrl), // Kullanıcı avatar URL'si
+                                            backgroundImage: NetworkImage(""), // Kullanıcı avatar URL'si
                                           ),
                                           title: Text(username),
                                           subtitle: Text(''),
@@ -187,7 +249,7 @@ class _ChatsListScreenState extends State<ChatsListScreen> {
                                             icon: Icon(Icons.delete),
                                           ),
                                         );
-                                      } else if (unseenSnapshot.hasError) {
+                                      } else if (lastMessageSnapshot.hasError) {
                                         return ListTile(
                                           leading: CircleAvatar(
                                             backgroundImage: NetworkImage(avatarUrl), // Kullanıcı avatar URL'si
@@ -202,29 +264,35 @@ class _ChatsListScreenState extends State<ChatsListScreen> {
                                           ),
                                         );
                                       } else {
-                                        final unseenMessages = unseenSnapshot.data!;
-                                        return ListTile(
-                                          leading: CircleAvatar(
-                                            backgroundImage: NetworkImage(avatarUrl), // Kullanıcı avatar URL'si
-                                          ),
-                                          title: Text(username),
-                                          subtitle:unseenMessages>0
-                                          ? Text('$unseenMessages new messages',style: TextStyle(color: const Color.fromARGB(255, 4, 61, 12)),)
-                                          : Center(), // Yeni mesaj sayısı
-                                          trailing: IconButton(
-                                            onPressed: () {
-                                              confirmAndDeleteRoom(context, room.room_id);
-                                            },
-                                            icon: Icon(Icons.delete),
-                                          ),
-                                          onTap: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) => ChatScreen(roomId: room.room_id),
+                                        final lastMessage = lastMessageSnapshot.data;
+                                        final userId = Supabase.instance.client.auth.currentUser?.id;
+                                        return FutureBuilder<Object>(
+                                          future: _controller.getOtherUserId(room.room_id),
+                                          builder: (context, otherUserIdSnapshot) {
+                                            final userId = otherUserIdSnapshot.data;
+                                            return ListTile(
+                                              leading: CircleAvatar(
+                                                backgroundImage: NetworkImage("https://wjxfpnsrjsofhfstivls.supabase.co/storage/v1/object/public/images/uploads/${userId}/${avatarUrl}"), // Kullanıcı avatar URL'si
                                               ),
+                                              title: Text(username),
+                                              subtitle:
+                                              Text('$lastMessage',style: TextStyle(color: const Color.fromARGB(255, 51, 52, 51)),),
+                                              trailing: IconButton(
+                                                onPressed: () {
+                                                  confirmAndDeleteRoom(context, room.room_id);
+                                                },
+                                                icon: Icon(Icons.delete),
+                                              ),
+                                              onTap: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) => ChatScreen(roomId: room.room_id),
+                                                  ),
+                                                );
+                                              },
                                             );
-                                          },
+                                          }
                                         );
                                       }
                                     },

@@ -154,6 +154,24 @@ Future<String> getOtherUsername(String roomId) async {
   return userResponse['username'];
 }
 
+Future<String> getOtherUserId(String roomId) async {
+  final currentUser = supabase.auth.currentUser!.id;
+  final response = await supabase
+      .from('rooms')
+      .select('user1_id, user2_id')
+      .eq('room_id', roomId)
+      .single();
+
+  final otherUserId = response['user1_id'] == currentUser
+      ? response['user2_id']
+      : response['user1_id'];
+
+  return otherUserId;
+}
+
+
+
+
 Future<String> getOtherAvatarUrl(String roomId) async {
   final currentUser = supabase.auth.currentUser!.id;
   final response = await supabase
@@ -244,7 +262,5 @@ print('error : $e');
 }
 }
 
-
-//load image to supabase
 }
 

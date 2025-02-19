@@ -60,31 +60,34 @@ if(image != null){
 }
 
 }
-//upload 
-Future uploadImage() async {
-  if (_imageFile == null) return;
+  // upload
+  Future uploadImage() async {
+    if (_imageFile == null) return;
 
-  final user = _supabase.auth.currentUser;
-  if (user == null) return;
+    final user = _supabase.auth.currentUser;
+    if (user == null) return;
 
-  // generate a unique file path using user id
-  final fileName = '${user.id}_${DateTime.now().millisecondsSinceEpoch}';
-  final path = 'uploads/$fileName';
-  final image_url = await _supabase.storage.from('images').getPublicUrl(path);
-  // upload the image to supabase storage
-  await Supabase.instance.client.storage
-      .from('images')
-      .upload(path, _imageFile!)
-      .then((value) {
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Image upload is successful")));
-  });
+    final fileName = '${DateTime.now().millisecondsSinceEpoch}_${_imageFile!.path.split('/').last}';
+    final path = 'uploads/${user.id}/$fileName';
 
-  await _supabase.from('users').update({'avatar_url': image_url}).eq('id', user.id);
-}
+    // upload the image to supabase storage
+    final response = await _supabase.storage
+        .from('images')
+        .upload(path, _imageFile!);
 
+    if (response.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Image upload is successful")));
+
+      await _supabase.from('users').update({'avatar_url': fileName}).eq('id', user.id);
+
+      // reload user data to update the UI
+      _loadUserData();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Image upload failed:")));
+    }
+  }
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
     userName;
     userEmail;
@@ -129,7 +132,12 @@ Future uploadImage() async {
             SizedBox(height: 100.h),
             CircleAvatar(
               radius: 50.r,
-              backgroundImage: NetworkImage(avatarUrl ?? 'https://www.pngitem.com/pimgs/m/146-1468479_my-profile-icon-blank-profile-picture-circle-hd.png'),
+              backgroundImage: NetworkImage(
+                avatarUrl != '' && avatarUrl != null
+                    ? 'https://wjxfpnsrjsofhfstivls.supabase.co/storage/v1/object/public/images/uploads/${_supabase.auth.currentUser!.id}/$avatarUrl'
+                    : 'https://www.pngitem.com/pimgs/m/146-1468479_my-profile-icon-blank-profile-picture-circle-hd.png',
+              ),
+
             ),
             SizedBox(height: 20.h),
             ElevatedButton(onPressed: ()async{
