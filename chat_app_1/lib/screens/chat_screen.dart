@@ -114,6 +114,30 @@ if(image != null){
  });
 }}
 
+// upload
+  Future uploadImage() async {
+    if (_imageFile == null) return;
+
+    final user = _supabase.auth.currentUser;
+    if (user == null) return;
+
+    final fileName = '${DateTime.now().millisecondsSinceEpoch}_${_imageFile!.path.split('/').last}';
+    final path = 'uploads/${widget.roomId}/$fileName';
+
+    // upload the image to supabase storage
+    final response = await _supabase.storage
+        .from('chat_images')
+        .upload(path, _imageFile!);
+
+    if (response.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Image upload is successful")));
+      // reload user data to update the UI
+      await  _loadMessages();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Image upload failed:")));
+    }
+  }
+
   // Kaydırmayı en alta yapacak fonksiyon
   void _scrollToBottom() {
     // Mesajlar geldikçe kaydırmayı kontrol et
@@ -226,13 +250,17 @@ if(image != null){
                   ),
                   IconButton(onPressed:()async{
                     await pickImage();
+                    await uploadImage();
+                    setState(() {
+                      _loadMessages();
+                    });
                   }, icon: Icon(Icons.photo_camera)),
                   IconButton(
                     icon: Icon(Icons.send),
                     onPressed: () async {
                       if (_messageController.text.isNotEmpty) {
                         await _controller.sendMessage(
-                            _messageController.text, widget.roomId);
+                            _messageController.text, widget.roomId,"imageee");
                         _messageController.clear();
                         _loadMessages();
                       }

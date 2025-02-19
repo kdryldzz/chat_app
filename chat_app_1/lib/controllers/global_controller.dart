@@ -79,7 +79,7 @@ Future<String> getReceiverUserId(String roomId) async {
   return response['user1_id'] == currentUser ? response['user2_id'] : response['user1_id'];
 }
 
-Future<void> sendMessage(String content, String roomId) async {
+Future<void> sendMessage(String content, String roomId, String image_url) async {
   final currentUser = supabase.auth.currentUser!.id;
   final receiverUserId = await getReceiverUserId(roomId);
   try {
@@ -91,6 +91,7 @@ Future<void> sendMessage(String content, String roomId) async {
           'receiverUser_id': receiverUserId,
           'room_id': roomId,
           'created_at': DateTime.now().toIso8601String(),
+          'image_url' :image_url
         });
 
     if (response.isEmpty) {
@@ -241,6 +242,7 @@ Future<void> deleteMessageFromSupabase(String messageId) async {
           roomId: message.room_id,
           content: message.content,
           createdAt: message.created_at,
+          image_url: message.image_url
         ));
       }
     }
@@ -279,7 +281,5 @@ print('error : $e');
       return 0;
     }
   }
-
-
 }
 

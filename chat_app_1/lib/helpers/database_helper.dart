@@ -19,8 +19,9 @@ class DatabaseHelper {
     String path = join(await getDatabasesPath(), 'messages.db');
     return await openDatabase(
       path,
-      version: 1,
+      version: 2, // Versiyonu artırıyoruz
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
     );
   }
 
@@ -32,9 +33,16 @@ class DatabaseHelper {
         receiver_user_id TEXT,
         room_id TEXT,
         content TEXT,
-        created_at TEXT
+        created_at TEXT,
+        image_url TEXT
       )
     ''');
+  }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute('ALTER TABLE messages ADD COLUMN image_url TEXT');
+    }
   }
 
   Future<void> insertMessage(LocalMessage message) async {
@@ -76,12 +84,10 @@ class DatabaseHelper {
     );
   }
 
-
   Future<bool> messageExists(String messageId) async {
-  final db = await database;
-  final result = await db.rawQuery(
-      'SELECT 1 FROM messages WHERE message_id = ? LIMIT 1', [messageId]); // Daha hızlı
-  return result.isNotEmpty;
-}
-
+    final db = await database;
+    final result = await db.rawQuery(
+        'SELECT 1 FROM messages WHERE message_id = ? LIMIT 1', [messageId]); // Daha hızlı
+    return result.isNotEmpty;
+  }
 }

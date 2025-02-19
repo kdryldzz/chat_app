@@ -5,6 +5,7 @@ class LocalMessage {
   final String roomId;
   final String content;
   final DateTime createdAt;
+  final String image_url;
 
   LocalMessage({
     required this.messageId,
@@ -13,6 +14,7 @@ class LocalMessage {
     required this.roomId,
     required this.content,
     required this.createdAt,
+    required this.image_url,
   });
 
   factory LocalMessage.fromMap(Map<String, dynamic> map) {
@@ -23,6 +25,7 @@ class LocalMessage {
       roomId: map['room_id'],
       content: map['content'],
       createdAt: DateTime.parse(map['created_at']),
+      image_url: map['image_url']
     );
   }
 
@@ -34,6 +37,7 @@ class LocalMessage {
       'room_id': roomId,
       'content': content,
       'created_at': createdAt.toIso8601String(),
+      'image_url' : image_url
     };
   }
 }
