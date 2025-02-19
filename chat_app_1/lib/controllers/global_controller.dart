@@ -2,6 +2,7 @@ import 'package:chat_app_1/helpers/database_helper.dart';
 import 'package:chat_app_1/models/local_message.dart';
 import 'package:chat_app_1/models/messages.dart';
 import 'package:chat_app_1/models/rooms.dart';
+import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:chat_app_1/models/users.dart';
 
@@ -261,6 +262,24 @@ print('error : $e');
 }
 }
 }
+
+  Future<int> countUnseenMessages(String roomId) async {
+    final currentUser = supabase.auth.currentUser!.id;
+    try {
+      final response = await supabase
+          .from('messages')
+          .select('message_id')
+          .eq('receiverUser_id', currentUser)
+          .eq('room_id', roomId)
+          .eq('seen', false);
+      final List<dynamic> unseenMessages = response as List<dynamic>;
+      return unseenMessages.length;
+    } catch (e) {
+      debugPrint('Error counting unseen messages: $e');
+      return 0;
+    }
+  }
+
 
 }
 

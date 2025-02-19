@@ -72,23 +72,6 @@ class _ChatsListScreenState extends State<ChatsListScreen> {
     }
   }
 
-  Future<int> countUnseenMessages(String roomId) async {
-    final currentUser = _supabase.auth.currentUser!.id;
-    try {
-      final response = await _supabase
-          .from('messages')
-          .select('message_id')
-          .eq('receiverUser_id', currentUser)
-          .eq('room_id', roomId)
-          .eq('seen', false);
-      final List<dynamic> unseenMessages = response as List<dynamic>;
-      return unseenMessages.length;
-    } catch (e) {
-      debugPrint('Error counting unseen messages: $e');
-      return 0;
-    }
-  }
-
 
    String lastMessage = "";
  Future<String> fetchLastMessage(String roomId) async {
@@ -255,7 +238,7 @@ Future<LocalMessage?> fetchLastLocalMessage(String roomId) async {
                                             backgroundImage: NetworkImage(avatarUrl), // Kullanıcı avatar URL'si
                                           ),
                                           title: Text(username),
-                                          subtitle: Text('Error loading unseen messages'),
+                                          subtitle: Text('Error loading last message'),
                                           trailing: IconButton(
                                             onPressed: () {
                                               confirmAndDeleteRoom(context, room.room_id);
@@ -265,32 +248,43 @@ Future<LocalMessage?> fetchLastLocalMessage(String roomId) async {
                                         );
                                       } else {
                                         final lastMessage = lastMessageSnapshot.data;
-                                        final userId = Supabase.instance.client.auth.currentUser?.id;
-                                        return FutureBuilder<Object>(
+                                        return FutureBuilder<String>(
                                           future: _controller.getOtherUserId(room.room_id),
                                           builder: (context, otherUserIdSnapshot) {
                                             final userId = otherUserIdSnapshot.data;
-                                            return ListTile(
-                                              leading: CircleAvatar(
-                                                backgroundImage: NetworkImage("https://wjxfpnsrjsofhfstivls.supabase.co/storage/v1/object/public/images/uploads/${userId}/${avatarUrl}"), // Kullanıcı avatar URL'si
-                                              ),
-                                              title: Text(username),
-                                              subtitle:
-                                              Text('$lastMessage',style: TextStyle(color: const Color.fromARGB(255, 51, 52, 51)),),
-                                              trailing: IconButton(
-                                                onPressed: () {
-                                                  confirmAndDeleteRoom(context, room.room_id);
-                                                },
-                                                icon: Icon(Icons.delete),
-                                              ),
-                                              onTap: () {
-                                                Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (context) => ChatScreen(roomId: room.room_id),
+                                            return FutureBuilder<int>(
+                                              future: _controller.countUnseenMessages(room.room_id),
+                                              builder: (context, unseenMessagesSnapshot) {
+                                               final  unseenMessageNumber = unseenMessagesSnapshot.data;
+                                                return ListTile(
+                                                  leading: CircleAvatar(
+                                                    backgroundImage: NetworkImage("https://wjxfpnsrjsofhfstivls.supabase.co/storage/v1/object/public/images/uploads/${userId}/${avatarUrl}"), // Kullanıcı avatar URL'si
                                                   ),
+                                                  title: Text(username),
+                                                  subtitle:
+                                                  Text('$lastMessage',style: TextStyle(color: const Color.fromARGB(255, 51, 52, 51)),),
+                                                  trailing: Container(
+                                                    alignment: Alignment.center,
+                                                    height: 30.h,
+                                                    width: 30.w,
+                                                    decoration: BoxDecoration(
+                                                    color: Colors.green,
+                                                    borderRadius: BorderRadius.circular(15),
+                                                  ), child: Text("$unseenMessageNumber")
+                                                  ), 
+                                                  onTap: () {
+                                                    Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                        builder: (context) => ChatScreen(roomId: room.room_id),
+                                                      ),
+                                                    );
+                                                  },
+                                                  onLongPress:(){ 
+                                                  print("long pressed");
+                                                  } ,
                                                 );
-                                              },
+                                              }
                                             );
                                           }
                                         );
